@@ -1,0 +1,113 @@
+{% extends "template.phtml" %}
+
+{% block content %}
+
+
+{#
+ # Block to show errors if present
+ #}
+{% if errorStr|length > 0 %}
+  <div style="border-style: solid; border-width: 5px; border-color: red; margin:20px; padding:20px">
+  <h3>{{ errorStr }}</h3>
+  </div>
+{% endif %}
+
+
+{#
+ # Block to show messages if present (the shots' checked message)
+ #}
+{% if messageStr|length > 0 %}
+  <div style="border-style: solid; border-width: 5px; border-color: lightgreen; margin:20px; padding:20px">
+  <h3>{{ messageStr }}</h3>
+  {% if messageSubStr|length > 0 %}
+    {{ messageSubStr }}
+  {% endif %}
+  </div>
+{% endif %}
+
+
+{#
+ # Date selection 
+ #}
+<div style="display: inline-block; vertical-align: top; ">
+<form name="homeBody" action="index.php" method="POST">
+<input type="date" name="dateToShow" value="{{dateToShow}}" style="font-size:20pt;"/> 
+  <!-- <input type="text" class="auto-kal" 
+       data-kal="closeOnSelection: true, weekStart: 1" name="dateToShow" value="{{dateToShow}}" /> 
+  -->
+<br/>
+<h3> 
+  <button name="subject" type="submit" value="setDate" style="font-size: 24px;">
+    Set Date
+  </button> 
+</h3>
+</div>
+
+
+{#
+ # Description of color meaning
+ #}
+<div style="display: inline-block; margin-left: 50px; vertical-align: top; ">
+Legenda <br>
+<table>
+  <tr>
+  {% for x in statusDefinitions %}
+    <td style="border: 1px solid black; background-color:{{x[1]}}; width: 200px">
+      {% if x[2] %} 
+        <input type='checkbox' name='checkINVALID' value='0'>
+      {% endif %}
+      {{x[3]}}</td>
+  {% endfor %}
+  </tr>
+</table>
+</div>
+
+
+<hr>
+
+
+{#
+ # some logging information
+ #}
+Request from IP: <b>{{ remoteIpAddress}}</b> - Shots <b>{{ shotDate }}...</b>
+
+
+{#
+ # main status table
+ #}
+<table style="border: 1px solid black; border-collapse: collapse;">
+  <tr>
+    <td style="border: 1px solid black;"></td>
+    {% for x in listOfShots %}
+      <td style="border: 1px solid black;"> <center>{{ x|slice(0,6) }}<br>{{ x|slice(6) }}</center> </td>
+    {% endfor %}
+  </tr>
+
+  {% for x in listOfTrees %}
+  <tr> 
+    <td style="border: 1px solid black;">{{ x }} </td>
+    {% for y in listOfShots %}
+      {% set sts = tableOfStatusUI[loop.parent.loop.index0][loop.index0] %}
+      <td style="border: 1px solid black; background-color:{{sts[1]}}"> <center> 
+        {% if sts[2] %} 
+          <input type='checkbox' name='check{{loop.parent.loop.index0}}x{{loop.index0}}' value='0'>
+        {% endif %}
+      </center></td>
+    {% endfor %}
+  </tr>
+  {% endfor %}
+
+</table>
+
+{#
+ # button to check shots
+ #}
+<h3> 
+  <button name="subject" type="submit" value="copySelectedShots" style="font-size: 24px;">
+    Copy selected shots
+  </button> 
+</h3>
+
+</form>
+
+{% endblock %}

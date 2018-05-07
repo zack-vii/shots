@@ -1,0 +1,151 @@
+\documentclass[12pt]{article}
+
+\usepackage{multirow}
+\usepackage{makeidx}
+\usepackage{graphicx} 
+\usepackage{isodateo}
+\usepackage{lastpage}
+\usepackage[utf8]{inputenc}
+
+\makeindex
+
+\title{Shots to show}
+\author{Gianluca Moro\footnote{Gianluca.Moro@unipd.it - at Max-Planck-Institut f\"ur Plasmaphysik, Greifswald, DE}}
+\date{25 April 2018}
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+
+The project implements a web page which can give a compact overview
+of the shots' statuses of a day. It is possible to:
+\begin{itemize}
+\item select a date;
+\item show all the shots present in that date and their status;
+\item check the shots to flag them as ready to be copied.
+\end{itemize}
+
+The web app is implemented in Php and uses a SQLite database as storage
+for flags status (by Timo Schr\"oder).
+
+
+\section{Code overview}
+
+
+\subsection{Libraries}
+
+The page uses the following libaries, stored in \texttt{web/js}:
+\begin{itemize}
+\item Twig (\texttt{https://twig.symfony.com/}, used in the Symfony framework, 
+  but can be used standalone too): is a templating library for web pages
+\item Kalendae (\texttt{https://github.com/Twipped/Kalendae}):
+  is an utility do show a calendar - the usage of this library can be avoided
+  using the standard HTML input date form (the solution used at the moment).
+  Directory \texttt{archive} stores the used source code.
+\item liblog.php: some logging functions (not used at the moment) 
+\end{itemize}
+
+\subsection{Main code}
+
+
+The Php source files are in the main directory:
+\begin{itemize}
+\item config.php: keeps some configuration variables
+\begin{description}
+\item[\$ipAllowedToCopy] keeps a list of IPs allowed to check shots: 
+  if the connection comes from an allowed IP that user can check shots.
+  If the list is empty, everyone can check shots.
+\item[\$shotsDirectory] the directory storing MDSplus shots
+\item[\$mainW7XTreeName] the tree which is used to get the list of shots: 
+  if a shot is present, it must be present in this directory.
+\item[\$statusDefinitions] the map from status as recovered from database to
+  its color, the presence (\texttt{true}) or absence (\texttt{false}) of checkbox,
+  and a message shown on the web page legend.
+\item[\$dbFilename] the SQLite file with the shots' database and the variable \textbf{\$dbShots}
+  containing the database (as a matter of fact, logically not a configuration variable).
+\item[\$listOfTrees] the list of current trees, present in configuration as it
+  was thought for a ``default'' list: in the current code it is always initialized 
+  to the corrent list, so its value as defined here is never used.
+\item[\$logFileName] and \textbf{\$logLevel} at the moment not used
+\end{description}
+
+\item externalCmds.php: code to interface to database and filesystem
+\begin{description}
+\item[getListOfTrees()] get the list of all the trees, from the external command \texttt{w7x\_gettrees}
+\item[getTableOfStatus(\$listOfTrees, \$listOfShots)] for each tree in the 1$^{st}$ parameter list
+  and for each shot in the 2$^{nd}$ parameter's list, a query to the database is done to get the status.
+  The query is: \texttt{SELECT stat FROM shotdb WHERE shot=sName AND expt=tName;}
+\item[saveShot(\$tree, \$shot)] this function checks the given shot: the real action is
+  to set the status to ``2'' if is was ``1''. The query to set the status is: \texttt{UPDATE shotdb SET stat=2 WHERE shot=sName AND expt=tName;}.
+\item[getListOfShots(\$dirName, \$shotDate)] get the list of the shots in a given date.
+\end{description}
+
+\item index.php: the main function is \texttt{buildHome}, which show a form to select the date,
+  recover the list of shots for that day, recover all the statuses for the found shots and
+  call the Twig template rendering with all the information.
+
+  If there is a request to check (the user selected some shots and submitted them), then
+  those shots are checked in the database (only if the IP is allowed)
+\end{itemize}
+
+
+\subsection{The html interface}
+
+The files are in the \texttt{web} directory. The \texttt{web/js}
+contains the static files for web (images and javascript libraries), while
+the base \texttt{web} contains 2 Twig templates (extension phtml):
+\begin{description}
+\item[template.phtml] a template loading needed Javascript libraries and
+  with the header layout of the page.
+\item[home.phtml] the main body, with  different sections:
+\begin{itemize}
+\item a block which shows messages (green border) or errors (red border) if present.
+\item the date selection form: here the code using ``Kalendae'' is commented.
+\item a legend of the meaning of the colours
+\item the main table, showing the info (color) of the statuses and checkboxes
+\item the submit button if something has been checked
+\end{itemize}
+\end{description}
+
+
+
+\subsection{Other files}
+\begin{itemize}
+\item phpinfo.php: shows Php configuration
+\item archive: source of kalendae library
+\item testauth: An authentication test page with kerberos
+\item testShots: a local simulation of a tree structure
+\end{itemize}
+
+
+\section{Information on the infrastructure}
+
+\begin{itemize}
+
+\item The source is in \texttt{mds-data-1:/home/gimo/shots}, and can be tested
+  by running in that directory the command \texttt{php -S 10.44.4.11:4000} and
+accessing the web page by \texttt{http://10.44.4.11:4000/index.php}.
+The present documentation is in \texttt{mds-data-1:/home/gimo/shots-doc}.
+
+
+\item Server with MDSplus data:
+ \texttt{mds-control},
+ \texttt{mds-data-1},
+ \texttt{mds-data-2}.
+
+\item The trees are stored in:
+\texttt{/w7x/vault/}\textit{treename}, with the following filename format:
+\texttt{w7x\_yymmddnnn}.
+
+\item The status is coded as integer:
+\begin{itemize}
+\item $<=$0 - RED - NOT READY
+\item 1  -    RED - CHECK - ready to be checked
+\item 2  -    ORANGE    - checked
+\item $>$2 -  GREEN - PROCESSED
+\end{itemize}
+\end{itemize}
+
+\end{document}
