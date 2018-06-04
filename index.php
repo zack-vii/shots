@@ -148,7 +148,9 @@ function addUIDataToTableOfStatus($table, $treeCount, $shotCount) {
       if ($val <= 0) { $index = 0; }
       if ($val == 1) { $index = 1; }
       if ($val == 2) { $index = 2; }
-      if ($val >= 3) { $index = 3; }
+      if ($val == 3) { $index = 3; }
+      if ($val == 4) { $index = 4; }
+      if ($val >= 5) { $index = 5; }
       $ret[$t][$s] = $statusDefinitions[$index];
     }
   }

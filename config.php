@@ -14,12 +14,13 @@ $mainW7XTreeName = "w7x";
 
 $statusDefinitions = [
 // value in db, color, checkable, comment
-  [ 0, 'red',    false, "Not ready" ],
-  [ 1, 'red',    true,  "Ready to be checked" ],
-  [ 2, 'orange', false, "Checked - processing" ],
-  [ 3, 'green',  false, "Processed" ]
+  [ 0, 'lightgray', false, "Storing: registered but currently running shot" ],
+  [ 1, 'orange',    true,  "Ready: acquisition complete" ],
+  [ 2, 'lawngreen', false, "Checked: ready to be uploaded" ],
+  [ 3, 'yellow',    false, "Uploading: a service is currently uploading shot" ],
+  [ 4, 'red',       false, "Error: upload failed - requires user assist" ],
+  [ 5, 'green',     false, "Uploaded: upload completed successfully" ]
 ];
-
 
 $dbFilename = "/w7x/vault/shotdb2.db";
 $dbShots = new SQLite3($dbFilename);
