@@ -46,7 +46,7 @@ function buildHome() {
 
   if ($isPosted) {
     $dateToShow = is_null($_POST["dateToShow"])?date('Y-m-d'):$_POST["dateToShow"];
-  } else {  
+  } else {
     $dateToShow = date('Y-m-d');
   }
 
@@ -100,7 +100,7 @@ function buildHome() {
     'messageSubStr' => $messageSubStr,
     'title' => 'Status of shots',
     'isPosted' => $isPosted,
-    'dateToShow' => $dateToShow, 
+    'dateToShow' => $dateToShow,
     'shotDate' => $shotDate,
     'listOfTrees' => $listOfTrees,
     'listOfShots' => $listOfShots,
@@ -133,7 +133,7 @@ function checkChecked($posted, $listOfTrees, $listOfShots) {
         array_push($res, array($listOfTrees[$d], $listOfShots[$s]));
       }
     }
-  } 
+  }
   return $res;
 }
 
@@ -142,15 +142,12 @@ function addUIDataToTableOfStatus($table, $treeCount, $shotCount) {
   global $statusDefinitions;
   $ret = [];
   for ($t=0; $t<$treeCount; $t++) {
-    for ($s=0; $s<$shotCount; $s++) {  
+    for ($s=0; $s<$shotCount; $s++) {
       $val = $table[$t][$s];
       $index = 0;
-      if ($val <= 0) { $index = 0; }
-      if ($val == 1) { $index = 1; }
-      if ($val == 2) { $index = 2; }
-      if ($val == 3) { $index = 3; }
-      if ($val == 4) { $index = 4; }
-      if ($val >= 5) { $index = 5; }
+      if ($val < 0 or $val > 5)
+           { $index = 4; }
+      else { $index = $val; }
       $ret[$t][$s] = $statusDefinitions[$index];
     }
   }

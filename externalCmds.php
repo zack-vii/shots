@@ -8,9 +8,9 @@
 // The list of trees comes from an external command
 //
 function getListOfTrees() {
-  $output = shell_exec('w7x_gettrees');
-  if (strpos($output, "/w7x/vault/shotdb2.db") === 0) {
-    $output = substr($output, strlen("/w7x/vault/shotdb2.db"));
+  $output = shell_exec('/usr/local/w7x/bin/mdsplusw7x/w7x_gettrees');
+  if (strpos($output, "/w7x/shotdb/shotdb2.db") === 0) {
+    $output = substr($output, strlen("/w7x/shotdb/shotdb2.db"));
   }
   return explode(" ", trim($output));
 }
@@ -53,7 +53,7 @@ function saveShot($tree, $shot) {
   if ($results != false) {
     $row = $results->fetchArray();
     if (is_array($row) && count($row)>0) {
-      $status = $row[0];      
+      $status = $row[0];
       if ($status == 1) {
 	$dbShots->query('UPDATE shotdb SET stat=2 WHERE shot='.$shot.' AND expt="'.$tree.'";');
       }
