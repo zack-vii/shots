@@ -19,7 +19,6 @@ $logger = new Logger($logFileName, $logLevel);
 // main entry point
 //
 
-$listOfTrees = getListOfTrees();
 
 $remoteIpAddress = $_SERVER['REMOTE_ADDR'];
 
@@ -32,12 +31,16 @@ buildHome();
 
 function buildHome() {
   global $twig;
-  global $listOfTrees;
-  global $mainW7XTreeName;
   global $remoteIpAddress;
   global $isDebug;
   global $statusDefinitions;
+  global $dbFilename;
+  global $dbShots;
+  global $isAllowed;
 
+  $isAllowed   = ipIsAllowed($remoteIpAddress);
+
+  $dbShots = new SQLite3($dbFilename);
   if (count($_POST) == 0) {
     $isPosted = false;
   } else {
@@ -52,22 +55,23 @@ function buildHome() {
 
   //var_dump($_POST["dateToShow"]);
 
-  $shotDate = date('ymd', strtotime($dateToShow));
-  $listOfShots = getListOfShots($mainW7XTreeName, $shotDate);
-
-  if (array_key_exists('subject', $_REQUEST) && ($_REQUEST['subject'] == 'copySelectedShots')) {
-    $theChecked = checkChecked($_POST, $listOfTrees, $listOfShots);
+  $shotDate    = date('ymd', strtotime($dateToShow));
+  $listOfShots = getListOfShots($shotDate);
+  $listOfExpts = getListOfExpts($shotDate);
+  if ($isAllowed && array_key_exists('subject', $_REQUEST) && ($_REQUEST['subject'] == 'copySelectedShots')) {
+    $theChecked = checkChecked($_POST, $listOfExpts, $listOfShots);
     //echo("<pre>"); var_dump($theChecked); exit;
-    if (ipIsAllowed($remoteIpAddress)) {
+    if (isAllowed) {
       for ($i=0; $i<count($theChecked); $i++) {
         saveShot($theChecked[$i][0], $theChecked[$i][1]);
       }
     }
   } else {
     $theChecked = array();
+    $statusDefinitions[1][2] = false;
   }
 
-  $tableOfStatus = getTableOfStatus($listOfTrees, $listOfShots);
+  $tableOfStatus = getTableOfStatus($listOfExpts, $listOfShots);
 
   $template = $twig->loadTemplate('home.phtml');
   $messageStr = "";
@@ -75,17 +79,17 @@ function buildHome() {
   $errorStr = "";
   if (count($theChecked) > 0) {
     if (ipIsAllowed($remoteIpAddress)) {
-      $messageStr = "Copy request sent!";
+      $messageStr = "Upload request sent!";
       for ($k=0; $k<count($theChecked); $k++) {
         $messageSubStr = $messageSubStr . " (".$theChecked[$k][0] . ", " . $theChecked[$k][1] . ") ";
       }
     } else {
-      $errorStr = "You are not allowed to copy from IP: " . $remoteIpAddress;
+      $errorStr = "You are not allowed to check from IP: " . $remoteIpAddress;
     }
   }
 
 
-  $tableOfStatusUI = addUIDataToTableOfStatus($tableOfStatus, count($listOfTrees), count($listOfShots));
+  $tableOfStatusUI = addUIDataToTableOfStatus($tableOfStatus, count($listOfExpts), count($listOfShots));
   //echo("<pre>"); var_dump($tableOfStatusUI); exit;
 
   //var_dump($dateToShow);
@@ -102,7 +106,7 @@ function buildHome() {
     'isPosted' => $isPosted,
     'dateToShow' => $dateToShow,
     'shotDate' => $shotDate,
-    'listOfTrees' => $listOfTrees,
+    'listOfExpts' => $listOfExpts,
     'listOfShots' => $listOfShots,
     'tableOfStatusUI' => $tableOfStatusUI,
     'theChecked' => $theChecked,
@@ -125,12 +129,12 @@ function ipIsAllowed($remoteIp) {
    return false;
 }
 
-function checkChecked($posted, $listOfTrees, $listOfShots) {
+function checkChecked($posted, $listOfExpts, $listOfShots) {
   $res = array();
-  for($d=0; $d<count($listOfTrees); $d++) {
+  for($e=0; $e<count($listOfExpts); $e++) {
     for($s=0; $s<count($listOfShots); $s++) {
-      if (array_key_exists("check".$d."x".$s, $posted)) {
-        array_push($res, array($listOfTrees[$d], $listOfShots[$s]));
+      if (array_key_exists("check".$e."x".$s, $posted)) {
+        array_push($res, array($listOfExpts[$e], $listOfShots[$s]));
       }
     }
   }
@@ -138,17 +142,20 @@ function checkChecked($posted, $listOfTrees, $listOfShots) {
 }
 
 
-function addUIDataToTableOfStatus($table, $treeCount, $shotCount) {
+function addUIDataToTableOfStatus($table, $exptCount, $shotCount) {
   global $statusDefinitions;
   $ret = [];
-  for ($t=0; $t<$treeCount; $t++) {
+  for ($e=0; $e<$exptCount; $e++) {
     for ($s=0; $s<$shotCount; $s++) {
-      $val = $table[$t][$s];
-      $index = 0;
-      if ($val < 0 or $val > 5)
-           { $index = 4; }
-      else { $index = $val; }
-      $ret[$t][$s] = $statusDefinitions[$index];
+      $val = $table[$e][$s];
+      if  (!is_null($val)) {
+        if ($val < 0 or $val > 5) {
+          $index = 4;
+        } else {
+          $index = $val;
+        }
+        $ret[$e][$s] = $statusDefinitions[$index];
+      }
     }
   }
   return $ret;

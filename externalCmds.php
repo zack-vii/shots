@@ -4,35 +4,23 @@
 // Gianluca.Moro@unipd.it
 //
 
-//
-// The list of trees comes from an external command
-//
-function getListOfTrees() {
-  $output = shell_exec('/usr/local/w7x/bin/mdsplusw7x/w7x_gettrees');
-  if (strpos($output, "/w7x/shotdb/shotdb2.db") === 0) {
-    $output = substr($output, strlen("/w7x/shotdb/shotdb2.db"));
-  }
-  return explode(" ", trim($output));
-}
-
 
 //
-// get the status of all the shots given, for all the given trees
+// get the status of all the shots given, for all the given expts
 //
-function getTableOfStatus($listOfTrees, $listOfShots) {
+function getTableOfStatus($listOfExpts, $listOfShots) {
   global $dbShots;
   $res = array();
 
-  for ($tree=0; $tree<count($listOfTrees); $tree++) {
+  for ($ex=0; $ex<count($listOfExpts); $ex++) {
     for ($st=0; $st<count($listOfShots); $st++) {
-      $results = $dbShots->query('SELECT stat FROM shotdb WHERE shot='.$listOfShots[$st].' AND expt="'.$listOfTrees[$tree].'";');
-
-      $res[$tree][$st] = 0;
+      $results = $dbShots->query('SELECT stat FROM shotdb WHERE shot='.$listOfShots[$st].' AND expt="'.$listOfExpts[$ex].'";');
+      $res[$ex][$st] = NULL;
       if ($results != false) {
-        $row = $results->fetchArray();
+        $row = $results->fetchArray(SQLITE3_NUM);
         if (is_array($row) && count($row)>0) {
-           $res[$tree][$st] = $row[0];
-	}
+           $res[$ex][$st] = $row[0];
+        }
       }
     }
   }
@@ -49,40 +37,43 @@ function saveShot($tree, $shot) {
   global $dbShots;
 
   $results = $dbShots->query('SELECT stat FROM shotdb WHERE shot='.$shot.' AND expt="'.$tree.'";');
-
   if ($results != false) {
-    $row = $results->fetchArray();
+    $row = $results->fetchArray(SQLITE3_NUM);
     if (is_array($row) && count($row)>0) {
-      $status = $row[0];
-      if ($status == 1) {
-	$dbShots->query('UPDATE shotdb SET stat=2 WHERE shot='.$shot.' AND expt="'.$tree.'";');
-      }
+      $status = $row[0];-  $results = $dbShots->query('SELECT stat FROM shotdb WHERE shot='.$shot.' AND expt="'.$tree.'";');
     }
   }
 }
 
 
 //
-// get the list of shots (from directory listing)
+// get the list of shots (from shotdb)
 //
-function getListOfShots($dirName, $shotDate) {
-  global $shotsDirectory;
-  $fullPath = $shotsDirectory . $dirName;
-  $output = shell_exec('ls ' . $fullPath . "/*" . $shotDate . "???.tree");
-
-  if (is_null($output)) {
-    return array();
+function getListOfShots($shot) {
+  global $dbShots;
+  $res = array();
+  $results = $dbShots->query('SELECT DISTINCT shot FROM shotdb WHERE shot>'.$shot.'000 AND shot<='.$shot.'999;');
+  if ($results != false) {
+    while ($row = $results->fetchArray(SQLITE3_NUM)) {
+      array_push($res,$row[0]);
+    }
   }
-
-  $outFiles = explode("\n", $output);
-  $outFilesNames = array();
-  $prefixLength = strlen($fullPath)+1+4;
-  for ($i=0; $i<count($outFiles); $i++) {
-     if (strlen($outFiles[$i])>$prefixLength) {
-       array_push($outFilesNames, substr($outFiles[$i], $prefixLength, 9));
-     }
-  }
-
-  return $outFilesNames;
+  return $res;
 }
 
+//
+// get the list of expts (from shotdb)
+//
+function getListOfExpts($shot) {
+  global $dbShots;
+  global $mainExptName;
+  $res = array();
+  array_push($res,$mainExptName);
+  $results = $dbShots->query('SELECT DISTINCT expt FROM shotdb WHERE expt!="'.$mainExptName.'" AND shot>'.$shot.'000 AND shot<='.$shot.'999;');
+  if ($results != false) {
+    while ($row = $results->fetchArray(SQLITE3_NUM)) {
+      array_push($res,$row[0]);
+    }
+  }
+  return $res;
+}
