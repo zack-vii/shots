@@ -20,7 +20,7 @@ $statusDefinitions = [
   [ 5, 'green',     false, "Uploaded: upload completed successfully" ]
 ];
 
-$dbFilename = "/w7x/shotdb/shotdb2.db";
+$dbFilename = "/w7x/.db/shotdb2.db";
 
 // logging/errors configuration
 $logFileName = "logs/log1.txt";
