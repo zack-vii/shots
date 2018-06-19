@@ -1,15 +1,13 @@
-<!DOCTYPE html>
-<html>
-
-  <head>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml">
+<head>
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
-    <title>IPP shots</title>
+    <title>MDSplus - shots</title>
     <link rel="stylesheet" href="web/js/kalenda/kalendae.css" type="text/css" charset="utf-8">
     <script src="web/js/kalenda/kalendae.standalone.js" type="text/javascript" charset="utf-8"></script>
   </head>
 
-  <body>
+  <body style="font-family:Arial,Helvetica,sans-serif;">
 
 {#
  # Block to show errors if present
@@ -38,38 +36,13 @@
  # Date selection
  #}
 <div style="display: inline-block; vertical-align: top; ">
-<form name="homeBody" action="index.php" method="POST">
-<input type="date" name="dateToShow" value="{{dateToShow}}" style="font-size:20pt;"/>
-  <!-- <input type="text" class="auto-kal"
-       data-kal="closeOnSelection: true, weekStart: 1" name="dateToShow" value="{{dateToShow}}" />
-  -->
-<br/>
-<h3>
-  <button name="subject" type="submit" value="setDate" style="font-size: 24px;">
+<form id="date" name="homeBody" action="index.php" method="POST">
+<input type="date" name="date" value="{{date}}" style="font-size:16pt;font-weight:bold;"/>
+  <button name="subject" type="submit" value="setDate" style="font-size:16px;font-weight:bold;">
     Set Date
   </button>
-</h3>
+  refresh after <input type="number" name="refresh" value="{{refresh}}" align="right" style="direction: rtl;width: 80px;"/>s (0 for never)
 </div>
-
-
-{#
- # Description of color meaning
- #}
-<div style="display: inline-block; margin-left: 50px; vertical-align: top; ">
-Legenda <br>
-<table>
-  <tr>
-  {% for x in statusDefinitions %}
-    <td style="border: 1px solid black; background-color:{{x[1]}}; width: 200px">
-      {% if x[2] %}
-        <input type='checkbox' name='checkINVALID' value='0'>
-      {% endif %}
-      {{x[3]}}</td>
-  {% endfor %}
-  </tr>
-</table>
-</div>
-
 
 <hr>
 
@@ -77,7 +50,7 @@ Legenda <br>
 {#
  # some logging information
  #}
-Request from IP: <b>{{ remoteIpAddress}}</b> - Shots <b>{{ shotDate }}...</b>
+Request from IP: <strong>{{ remoteIpAddress}}</strong> - Shots <strong>{{ shotDate }}...</strong>
 
 
 {#
@@ -96,8 +69,8 @@ Request from IP: <b>{{ remoteIpAddress}}</b> - Shots <b>{{ shotDate }}...</b>
     <td style="border: 1px solid black;">{{ x }} </td>
     {% for y in listOfShots %}
       {% set sts = tableOfStatusUI[loop.parent.loop.index0][loop.index0] %}
-      <td style="border: 1px solid black; background-color:{{sts[1]}}"> <center>
-        {% if sts[2] %}
+      <td style="border: 1px solid black; background-color:{{sts[1]}}; margin: 10px 0px;"> <center>
+        {% if sts[2] and isAllowed[2] %}
           <input type='checkbox' name='check{{loop.parent.loop.index0}}x{{loop.index0}}' value='0'>
         {% endif %}
       </center></td>
@@ -118,8 +91,31 @@ Request from IP: <b>{{ remoteIpAddress}}</b> - Shots <b>{{ shotDate }}...</b>
   {% endif %}
 </h3>
 
+<hr>
+
 </form>
 
+{#
+ # Description of color meaning
+ #}
+<div style="display: inline-block; vertical-align: top; ">
+Legend <br>
+<table>
+  <tr>
+  {% for x in statusDefinitions %}
+    <td style="border: 1px solid black; background-color: {{x[1]}}; width: 200px">
+    <strong>{{x[3]}}</strong><br>{{x[4]}}</td>
+  {% endfor %}
+  </tr>
+</table>
+</div>
+<script type="text/javascript">
+  if ({{refresh}}>0) {
+    setTimeout(function () {
+      document.getElementById("date").submit();
+    },{{refresh}}*1000);
+  }
+</script>
   </body>
 </html>
 

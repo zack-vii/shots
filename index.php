@@ -40,19 +40,18 @@ function buildHome() {
   }
 
   if ($isPosted) {
-    $dateToShow = is_null($_POST["dateToShow"])?date('Y-m-d'):$_POST["dateToShow"];
+    $date    = is_null($_POST["date"])?date('Y-m-d'):$_POST["date"];
+    $refresh = is_null($_POST["refresh"])?  0    :$_POST["refresh"];
   } else {
-    $dateToShow = date('Y-m-d');
+    $date   = date('Y-m-d');
+    $refresh= 0;
   }
 
-  //var_dump($_POST["dateToShow"]);
-
-  $shotDate    = date('ymd', strtotime($dateToShow));
+  $shotDate    = date('ymd', strtotime($date));
   $listOfShots = getListOfShots($shotDate);
   $listOfExpts = getListOfExpts($shotDate);
   if ($isAllowed && array_key_exists('subject', $_REQUEST) && ($_REQUEST['subject'] == 'copySelectedShots')) {
     $theChecked = checkChecked($_POST, $listOfExpts, $listOfShots);
-    //echo("<pre>"); var_dump($theChecked); exit;
     if (isAllowed) {
       for ($i=0; $i<count($theChecked); $i++) {
         saveShot($theChecked[$i][0], $theChecked[$i][1]);
@@ -60,7 +59,6 @@ function buildHome() {
     }
   } else {
     $theChecked = array();
-    $statusDefinitions[1][2] = false;
   }
 
   $tableOfStatus = getTableOfStatus($listOfExpts, $listOfShots);
@@ -82,10 +80,6 @@ function buildHome() {
 
 
   $tableOfStatusUI = addUIDataToTableOfStatus($tableOfStatus, count($listOfExpts), count($listOfShots));
-  //echo("<pre>"); var_dump($tableOfStatusUI); exit;
-
-  //var_dump($dateToShow);
-  //var_dump($shotDate);
 
   $params = array(
     'isDebug' => $isDebug,
@@ -96,7 +90,8 @@ function buildHome() {
     'messageSubStr' => $messageSubStr,
     'title' => 'Status of shots',
     'isPosted' => $isPosted,
-    'dateToShow' => $dateToShow,
+    'date' => $date,
+    'refresh' => $refresh,
     'shotDate' => $shotDate,
     'listOfExpts' => $listOfExpts,
     'listOfShots' => $listOfShots,
@@ -113,11 +108,9 @@ function ipIsAllowed($remoteIp) {
    if (count($ipAllowedToCopy) == 0) {
      return true;
    }
-
    if (in_array($remoteIp, $ipAllowedToCopy)) {
      return true;
    }
-
    return false;
 }
 
