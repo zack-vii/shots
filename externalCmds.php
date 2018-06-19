@@ -69,7 +69,7 @@ function getListOfExpts($shot) {
   global $mainExptName;
   $res = array();
   array_push($res,$mainExptName);
-  $results = $dbShots->query('SELECT DISTINCT expt FROM shotdb WHERE expt!="'.$mainExptName.'" AND shot>'.$shot.'000 AND shot<='.$shot.'999;');
+  $results = $dbShots->query('SELECT DISTINCT expt FROM shotdb WHERE expt!="'.$mainExptName.'" AND shot>'.$shot.'000 AND shot<='.$shot.'999 ORDER BY expt;');
   if ($results != false) {
     while ($row = $results->fetchArray(SQLITE3_NUM)) {
       array_push($res,$row[0]);

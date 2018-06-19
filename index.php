@@ -6,28 +6,20 @@
 
 require_once('config.php');
 require_once('externalCmds.php');
-require_once('web/js/liblog.php');
 
 // load Twig library
 require_once './web/js/Twig/Autoloader.php';
 Twig_Autoloader::register();
 $loader = new Twig_Loader_Filesystem('./web');
 $twig = new Twig_Environment($loader);
-$logger = new Logger($logFileName, $logLevel);
 
 //
 // main entry point
 //
 
-
 $remoteIpAddress = $_SERVER['REMOTE_ADDR'];
 
 buildHome();
-
-
-//
-//
-//
 
 function buildHome() {
   global $twig;

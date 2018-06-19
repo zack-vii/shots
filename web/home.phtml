@@ -1,7 +1,15 @@
-{% extends "template.phtml" %}
+<!DOCTYPE html>
+<html>
 
-{% block content %}
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+    <title>IPP shots</title>
+    <link rel="stylesheet" href="web/js/kalenda/kalendae.css" type="text/css" charset="utf-8">
+    <script src="web/js/kalenda/kalendae.standalone.js" type="text/javascript" charset="utf-8"></script>
+  </head>
 
+  <body>
 
 {#
  # Block to show errors if present
@@ -112,4 +120,6 @@ Request from IP: <b>{{ remoteIpAddress}}</b> - Shots <b>{{ shotDate }}...</b>
 
 </form>
 
-{% endblock %}
+  </body>
+</html>
+
