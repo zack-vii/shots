@@ -50,37 +50,31 @@ function buildHome() {
   $shotDate    = date('ymd', strtotime($date));
   $listOfShots = getListOfShots($shotDate);
   $listOfExpts = getListOfExpts($shotDate);
-  if ($isAllowed && array_key_exists('subject', $_REQUEST) && ($_REQUEST['subject'] == 'copySelectedShots')) {
-    $theChecked = checkChecked($_POST, $listOfExpts, $listOfShots);
-    if (isAllowed) {
-      for ($i=0; $i<count($theChecked); $i++) {
-        saveShot($theChecked[$i][0], $theChecked[$i][1]);
-      }
-    }
-  } else {
-    $theChecked = array();
-  }
 
-  $tableOfStatus = getTableOfStatus($listOfExpts, $listOfShots);
-
-  $template = $twig->loadTemplate('home.phtml');
   $messageStr = "";
   $messageSubStr = "";
   $errorStr = "";
-  if (count($theChecked) > 0) {
-    if (ipIsAllowed($remoteIpAddress)) {
-      $messageStr = "Upload request sent!";
-      for ($k=0; $k<count($theChecked); $k++) {
-        $messageSubStr = $messageSubStr . " (".$theChecked[$k][0] . ", " . $theChecked[$k][1] . ") ";
+  if (array_key_exists('subject', $_REQUEST)) {
+    if ($_REQUEST['subject'] == 'copySelectedShots') {
+      if ($isAllowed) {
+        $theChecked = checkChecked($_POST, $listOfExpts, $listOfShots);
+        if (count($theChecked) > 0) {
+          $messageStr = "Upload request sent!";
+          for ($i=0; $i<count($theChecked); $i++)
+            $messageSubStr = $messageSubStr . " (".$theChecked[$i][0] . ", " . $theChecked[$i][1] . ") ";
+          for ($i=0; $i<count($theChecked); $i++)
+            saveShot($theChecked[$i][0], $theChecked[$i][1]);
+        }
       }
-    } else {
-      $errorStr = "You are not allowed to check from IP: " . $remoteIpAddress;
+    } elseif ($_REQUEST['subject'] == 'i') {
+      $info = explode(" ",$_REQUEST['info']);
+      $errorStr = getInfo($info[0],$info[1]);
     }
   }
 
-
-  $tableOfStatusUI = addUIDataToTableOfStatus($tableOfStatus, count($listOfExpts), count($listOfShots));
-
+  $template = $twig->loadTemplate('home.phtml');
+  $tableOfStatus = getTableOfStatus($listOfExpts, $listOfShots);
+  checkTableOfStatus($tableOfStatus, count($listOfExpts), count($listOfShots));
   $params = array(
     'isDebug' => $isDebug,
     'statusDefinitions' => $statusDefinitions,
@@ -95,12 +89,10 @@ function buildHome() {
     'shotDate' => $shotDate,
     'listOfExpts' => $listOfExpts,
     'listOfShots' => $listOfShots,
-    'tableOfStatusUI' => $tableOfStatusUI,
+    'tableOfStatus' => $tableOfStatus,
     'theChecked' => $theChecked,
   );
-
   $template->display($params);
-
 }
 
 function ipIsAllowed($remoteIp) {
@@ -127,10 +119,8 @@ function checkChecked($posted, $listOfExpts, $listOfShots) {
 }
 
 
-function addUIDataToTableOfStatus($table, $exptCount, $shotCount) {
-  global $statusDefinitions;
-  $ret = [];
-  for ($e=0; $e<$exptCount; $e++) {
+function checkTableOfStatus($table, $exptCount, $shotCount) {
+  for ($e=$exptCount; $e-->0;) {
     for ($s=0; $s<$shotCount; $s++) {
       $val = $table[$e][$s];
       if  (!is_null($val)) {
@@ -139,11 +129,10 @@ function addUIDataToTableOfStatus($table, $exptCount, $shotCount) {
         } else {
           $index = $val;
         }
-        $ret[$e][$s] = $statusDefinitions[$index];
+        $table[$e][$s] = $index;
       }
     }
   }
-  return $ret;
 }
 
 ?>

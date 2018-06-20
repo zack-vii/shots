@@ -5,7 +5,41 @@
     <title>MDSplus - shots</title>
     <link rel="stylesheet" href="web/js/kalenda/kalendae.css" type="text/css" charset="utf-8">
     <script src="web/js/kalenda/kalendae.standalone.js" type="text/javascript" charset="utf-8"></script>
-  </head>
+<style>
+.info {
+    background-color: red;
+    border: none;
+    cursor: pointer;
+    width:  100%;
+    height: 100%;
+    color: transparent;
+}
+.cell {
+    border: 1px solid black;
+    height: 100%;
+}
+.cell0 {
+    background-color: {{statusDefinitions[0][1]}};
+}
+.cell1 {
+    background-color: {{statusDefinitions[1][1]}};
+}
+.cell2 {
+    background-color: {{statusDefinitions[2][1]}};
+    align=center;
+}
+.cell3 {
+    background-color: {{statusDefinitions[3][1]}};
+}
+.cell4 {
+    background-color: {{statusDefinitions[4][1]}};
+}
+.cell5 {
+    background-color: {{statusDefinitions[5][1]}};
+}
+</style>
+
+</head>
 
   <body style="font-family:Arial,Helvetica,sans-serif;">
 
@@ -14,7 +48,7 @@
  #}
 {% if errorStr|length > 0 %}
   <div style="border-style: solid; border-width: 5px; border-color: red; margin:20px; padding:20px">
-  <h3>{{ errorStr }}</h3>
+  {{ errorStr|nl2br }}
   </div>
 {% endif %}
 
@@ -56,24 +90,32 @@ Request from IP: <strong>{{ remoteIpAddress}}</strong> - Shots <strong>{{ shotDa
 {#
  # main status table
  #}
-<table style="border: 1px solid black; border-collapse: collapse;">
+<table style="border: 1px solid black; border-collapse: collapse;" height="100%" width="100%">
   <tr>
-    <td style="border: 1px solid black;"></td>
+    <td class="cell"></td>
     {% for x in listOfShots %}
-      <td style="border: 1px solid black;"> <center>{{ x|slice(6) }} </center> </td>
+      <td class="cell" align="center"> {{ x|slice(6) }} </td>
     {% endfor %}
   </tr>
 
   {% for x in listOfExpts %}
-  <tr>
-    <td style="border: 1px solid black;">{{ x }} </td>
+  <tr height="100%">
+    <td class="cell">{{ x }}</td>
     {% for y in listOfShots %}
-      {% set sts = tableOfStatusUI[loop.parent.loop.index0][loop.index0] %}
-      <td style="border: 1px solid black; background-color:{{sts[1]}}; margin: 10px 0px;"> <center>
-        {% if sts[2] and isAllowed[2] %}
+      {% set sts = tableOfStatus[loop.parent.loop.index0][loop.index0] %}
+      <td class="cell cell{{sts}}">
+      {% if sts == 2 %}
+        {% if isAllowed[2] %}
           <input type='checkbox' name='check{{loop.parent.loop.index0}}x{{loop.index0}}' value='0'>
         {% endif %}
-      </center></td>
+      {% elseif sts == 4 %}
+        <form action="index.php" method="POST">
+          <input type="hidden" name="info" value="{{ x }} {{ y }}"/>
+          <input type="hidden" name="date" value="{{date}}"/>
+          <input class="info" name="subject" type="submit" value="i"/>
+        </form>
+      {% endif %}
+      </td>
     {% endfor %}
   </tr>
   {% endfor %}

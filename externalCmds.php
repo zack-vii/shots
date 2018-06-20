@@ -28,6 +28,20 @@ function getTableOfStatus($listOfExpts, $listOfShots) {
   return $res;
 }
 
+//
+// get the info of a given expt and shot
+//
+function getInfo($expt, $shot) {
+  global $dbShots;
+  $results = $dbShots->query('SELECT info FROM shotdb WHERE shot='.$shot.' AND expt="'.$expt.'";');
+  if ($results != false) {
+    $row = $results->fetchArray(SQLITE3_NUM);
+    if (is_array($row) && count($row)>0)
+      return $row[0];
+  }
+  return "no entry";
+}
+
 
 //
 // check a shot (only if the old status is 1)
