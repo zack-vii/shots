@@ -70,12 +70,14 @@
  # Date selection
  #}
 <div style="display: inline-block; vertical-align: top; ">
-<form id="date" name="homeBody" action="index.php" method="POST">
-<input type="date" name="date" value="{{date}}" style="font-size:16pt;font-weight:bold;"/>
-  <button name="subject" type="submit" value="setDate" style="font-size:16px;font-weight:bold;">
-    Set Date
+<form id="date" name="homeBody" action="index.php">
+  <input type="date"   name="date"    value="{{date}}"    style="font-size:16pt;font-weight:bold;"/>
+  <button type="submit"  style="font-size:16px;font-weight:bold;">
+  Set Date
   </button>
-  refresh after <input type="number" name="refresh" value="{{refresh}}" align="right" style="direction: rtl;width: 80px;"/>s (0 for never)
+  refresh after
+  <input type="number" name="refresh" value="{{refresh}}" style="direction: rtl;width: 80px;" align="right"/>
+  s (0 for never)
 </div>
 
 <hr>
@@ -90,7 +92,7 @@ Request from IP: <strong>{{ remoteIpAddress}}</strong> - Shots <strong>{{ shotDa
 {#
  # main status table
  #}
-<table style="border: 1px solid black; border-collapse: collapse;" height="100%" width="100%">
+<table style="border: 1px solid black; border-collapse: collapse;">
   <tr>
     <td class="cell"></td>
     {% for x in listOfShots %}
@@ -109,11 +111,7 @@ Request from IP: <strong>{{ remoteIpAddress}}</strong> - Shots <strong>{{ shotDa
           <input type='checkbox' name='check{{loop.parent.loop.index0}}x{{loop.index0}}' value='0'>
         {% endif %}
       {% elseif sts == 4 %}
-        <form action="index.php" method="POST">
-          <input type="hidden" name="info" value="{{ x }} {{ y }}"/>
-          <input type="hidden" name="date" value="{{date}}"/>
-          <input class="info" name="subject" type="submit" value="i"/>
-        </form>
+          <button class="info" name="info" type="submit" value="{{ x }}_{{ y }}">.</button>
       {% endif %}
       </td>
     {% endfor %}
@@ -127,7 +125,7 @@ Request from IP: <strong>{{ remoteIpAddress}}</strong> - Shots <strong>{{ shotDa
  #}
 <h3>
   {% if isAllowed[2] %}
-  <button name="subject" type="submit" value="copySelectedShots" style="font-size: 24px;">
+  <button name="subject" type="copy" value="copySelectedShots" style="font-size: 24px;">
     Copy selected shots
   </button>
   {% endif %}

@@ -33,19 +33,9 @@ function buildHome() {
   $isAllowed   = ipIsAllowed($remoteIpAddress);
 
   $dbShots = new SQLite3($dbFilename);
-  if (count($_POST) == 0) {
-    $isPosted = false;
-  } else {
-    $isPosted = true;
-  }
 
-  if ($isPosted) {
-    $date    = is_null($_POST["date"])?date('Y-m-d'):$_POST["date"];
-    $refresh = is_null($_POST["refresh"])?  0    :$_POST["refresh"];
-  } else {
-    $date   = date('Y-m-d');
-    $refresh= 0;
-  }
+  $date    = is_null($_GET["date"])?date('Y-m-d'):$_GET["date"];
+  $refresh = is_null($_GET["refresh"])?  0    :   $_GET["refresh"];
 
   $shotDate    = date('ymd', strtotime($date));
   $listOfShots = getListOfShots($shotDate);
@@ -54,36 +44,34 @@ function buildHome() {
   $messageStr = "";
   $messageSubStr = "";
   $errorStr = "";
-  if (array_key_exists('subject', $_REQUEST)) {
-    if ($_REQUEST['subject'] == 'copySelectedShots') {
-      if ($isAllowed) {
-        $theChecked = checkChecked($_POST, $listOfExpts, $listOfShots);
-        if (count($theChecked) > 0) {
-          $messageStr = "Upload request sent!";
-          for ($i=0; $i<count($theChecked); $i++)
-            $messageSubStr = $messageSubStr . " (".$theChecked[$i][0] . ", " . $theChecked[$i][1] . ") ";
-          for ($i=0; $i<count($theChecked); $i++)
-            saveShot($theChecked[$i][0], $theChecked[$i][1]);
-        }
+  if ($_POST['copy'] == 'copySelectedShots') {
+    if ($isAllowed) {
+      $theChecked = checkChecked($_POST, $listOfExpts, $listOfShots);
+      if (count($theChecked) > 0) {
+        $messageStr = "Upload request sent!";
+        for ($i=0; $i<count($theChecked); $i++)
+          $messageSubStr = $messageSubStr . " (".$theChecked[$i][0] . ", " . $theChecked[$i][1] . ") ";
+        for ($i=0; $i<count($theChecked); $i++)
+          saveShot($theChecked[$i][0], $theChecked[$i][1]);
       }
-    } elseif ($_REQUEST['subject'] == 'i') {
-      $info = explode(" ",$_REQUEST['info']);
+    } else {
+      $errorStr = "You are not allowed to do that!";
+    }
+  } else {
+    if (array_key_exists("info",$_GET)) {
+      $info     = explode("_",$_GET['info']);
       $errorStr = getInfo($info[0],$info[1]);
     }
   }
-
   $template = $twig->loadTemplate('home.phtml');
   $tableOfStatus = getTableOfStatus($listOfExpts, $listOfShots);
   checkTableOfStatus($tableOfStatus, count($listOfExpts), count($listOfShots));
   $params = array(
-    'isDebug' => $isDebug,
     'statusDefinitions' => $statusDefinitions,
     'remoteIpAddress' => $remoteIpAddress,
     'errorStr' => $errorStr,
     'messageStr' => $messageStr,
     'messageSubStr' => $messageSubStr,
-    'title' => 'Status of shots',
-    'isPosted' => $isPosted,
     'date' => $date,
     'refresh' => $refresh,
     'shotDate' => $shotDate,
