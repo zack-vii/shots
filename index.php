@@ -32,7 +32,7 @@ function buildHome() {
 
   $isAllowed   = ipIsAllowed($remoteIpAddress);
 
-  $dbShots = new SQLite3($dbFilename);
+  $dbShots = new SQLite3($dbFilename,SQLITE3_OPEN_READONLY);
 
   $date    = is_null($_GET["date"])?date('Y-m-d'):$_GET["date"];
   $refresh = is_null($_GET["refresh"])?  0    :   $_GET["refresh"];
@@ -44,7 +44,7 @@ function buildHome() {
   $messageStr = "";
   $messageSubStr = "";
   $errorStr = "";
-  if ($_POST['copy'] == 'copySelectedShots') {
+  if (array_key_exists('copy',$_POST) and $_POST['copy'] == 'copySelectedShots') {
     if ($isAllowed) {
       $theChecked = checkChecked($_POST, $listOfExpts, $listOfShots);
       if (count($theChecked) > 0) {
@@ -78,7 +78,6 @@ function buildHome() {
     'listOfExpts' => $listOfExpts,
     'listOfShots' => $listOfShots,
     'tableOfStatus' => $tableOfStatus,
-    'theChecked' => $theChecked,
   );
   $template->display($params);
 }
