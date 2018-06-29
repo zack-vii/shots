@@ -91,3 +91,20 @@ function getListOfExpts($shot) {
   }
   return $res;
 }
+
+//
+// get the list of expts (from shotdb)
+//
+function getListOfDays() {
+  global $dbShots;
+  $res = array();
+  $results = $dbShots->query("SELECT DISTINCT CAST(shot/'1000' AS int) AS day FROM shotdb %s ORDER BY day ASC;");
+  if ($results != false) {
+    while ($row = $results->fetchArray(SQLITE3_NUM)) {
+      array_push($res,$row[0]);
+    }
+  }
+  return $res;
+}
+
+
