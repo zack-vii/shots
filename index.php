@@ -105,18 +105,16 @@ function checkChecked($posted, $listOfExpts, $listOfShots) {
   return $res;
 }
 
-
 function checkTableOfStatus($table, $exptCount, $shotCount) {
   for ($e=$exptCount; $e-->0;) {
-    for ($s=0; $s<$shotCount; $s++) {
+    for ($s=$shotCount; $s-->0;) {
       $val = $table[$e][$s];
       if  (!is_null($val)) {
-        if ($val < 0 or $val > 5) {
-          $index = 4;
-        } else {
-          $index = $val;
+        if ($val < 0) {
+          $table[$e][$s] = 4;
+        } elseif ($val>5) {
+          $table[$e][$s] = 6;
         }
-        $table[$e][$s] = $index;
       }
     }
   }

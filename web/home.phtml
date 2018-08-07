@@ -7,7 +7,7 @@
     <script src="web/js/kalenda/kalendae.standalone.js" type="text/javascript" charset="utf-8"></script>
 <style>
 .info {
-    background-color: red;
+    background-color: transparent;
     border: none;
     cursor: pointer;
     width:  100%;
@@ -26,7 +26,6 @@
 }
 .cell2 {
     background-color: {{statusDefinitions[2][1]}};
-    align=center;
 }
 .cell3 {
     background-color: {{statusDefinitions[3][1]}};
@@ -36,6 +35,9 @@
 }
 .cell5 {
     background-color: {{statusDefinitions[5][1]}};
+}
+.cell6 {
+    background-color: {{statusDefinitions[6][1]}};
 }
 </style>
 
@@ -110,7 +112,7 @@ Request from IP: <strong>{{ remoteIpAddress}}</strong> - Shots <strong>{{ shotDa
         {% if isAllowed[2] %}
           <input type='checkbox' name='check{{loop.parent.loop.index0}}x{{loop.index0}}' value='0'>
         {% endif %}
-      {% elseif sts == 4 %}
+      {% elseif sts == 4 or sts == 6 %}
           <button class="info" name="info" type="submit" value="{{ x }}_{{ y }}">.</button>
       {% endif %}
       </td>
